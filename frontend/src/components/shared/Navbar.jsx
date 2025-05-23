@@ -47,11 +47,12 @@ const Navbar = () => {
                                     <li><Link to="/">Home</Link></li>
                                     <li><Link to="/jobs">Jobs</Link></li>
                                     <li><Link to="/browse">Browse</Link></li>
+                                    {user && user.role === 'student' && (
+                                        <li><Link to="/profile" className="flex items-center gap-1"><User2 className="w-4 h-4" /> Profile</Link></li>
+                                    )}
                                 </>
                             )
                         }
-
-
                     </ul>
                     {
                         !user ? (
@@ -97,10 +98,8 @@ const Navbar = () => {
                             </Popover>
                         )
                     }
-
                 </div>
             </div>
-
         </div>
     )
 }

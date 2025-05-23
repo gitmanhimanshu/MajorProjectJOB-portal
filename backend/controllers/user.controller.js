@@ -14,9 +14,22 @@ export const register = async (req, res) => {
                 success: false
             });
         };
+
         const file = req.file;
-        const fileUri = getDataUri(file);
-        const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
+        let profilePhoto = null;
+
+        if (file) {
+            try {
+                const fileUri = getDataUri(file);
+                const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
+                profilePhoto = cloudResponse.secure_url;
+            } catch (error) {
+                return res.status(400).json({
+                    message: "Error uploading profile photo: " + error.message,
+                    success: false
+                });
+            }
+        }
 
         const user = await User.findOne({ email });
         if (user) {
@@ -33,8 +46,8 @@ export const register = async (req, res) => {
             phoneNumber,
             password: hashedPassword,
             role,
-            profile:{
-                profilePhoto:cloudResponse.secure_url,
+            profile: {
+                profilePhoto: profilePhoto
             }
         });
 
@@ -44,6 +57,10 @@ export const register = async (req, res) => {
         });
     } catch (error) {
         console.log(error);
+        return res.status(500).json({
+            message: "Internal server error",
+            success: false
+        });
     }
 }
 export const login = async (req, res) => {
@@ -114,18 +131,6 @@ export const logout = async (req, res) => {
 export const updateProfile = async (req, res) => {
     try {
         const { fullname, email, phoneNumber, bio, skills } = req.body;
-        
-        const file = req.file;
-        // cloudinary ayega idhar
-        const fileUri = getDataUri(file);
-        const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
-
-
-
-        let skillsArray;
-        if(skills){
-            skillsArray = skills.split(",");
-        }
         const userId = req.id; // middleware authentication
         let user = await User.findById(userId);
 
@@ -135,19 +140,33 @@ export const updateProfile = async (req, res) => {
                 success: false
             })
         }
-        // updating data
-        if(fullname) user.fullname = fullname
-        if(email) user.email = email
-        if(phoneNumber)  user.phoneNumber = phoneNumber
-        if(bio) user.profile.bio = bio
-        if(skills) user.profile.skills = skillsArray
-      
-        // resume comes later here...
-        if(cloudResponse){
-            user.profile.resume = cloudResponse.secure_url // save the cloudinary url
-            user.profile.resumeOriginalName = file.originalname // Save the original file name
+
+        const file = req.file;
+        if (file) {
+            try {
+                const fileUri = getDataUri(file);
+                const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
+                user.profile.resume = cloudResponse.secure_url;
+                user.profile.resumeOriginalName = file.originalname;
+            } catch (error) {
+                return res.status(400).json({
+                    message: "Error uploading file: " + error.message,
+                    success: false
+                });
+            }
         }
 
+        let skillsArray;
+        if(skills){
+            skillsArray = skills.split(",");
+        }
+
+        // updating data
+        if(fullname) user.fullname = fullname;
+        if(email) user.email = email;
+        if(phoneNumber) user.phoneNumber = phoneNumber;
+        if(bio) user.profile.bio = bio;
+        if(skills) user.profile.skills = skillsArray;
 
         await user.save();
 
@@ -167,5 +186,9 @@ export const updateProfile = async (req, res) => {
         })
     } catch (error) {
         console.log(error);
+        return res.status(500).json({
+            message: "Internal server error",
+            success: false
+        });
     }
 }
