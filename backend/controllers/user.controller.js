@@ -6,9 +6,9 @@ import cloudinary from "../utils/cloudinary.js";
 
 export const register = async (req, res) => {
     try {
-        const { fullname, email, phoneNumber, password, role } = req.body;
+        const { fullname, email,  password, role } = req.body;
          
-        if (!fullname || !email || !phoneNumber || !password || !role) {
+        if (!fullname || !email  || !password || !role) {
             return res.status(400).json({
                 message: "Something is missing",
                 success: false
@@ -43,7 +43,7 @@ export const register = async (req, res) => {
         await User.create({
             fullname,
             email,
-            phoneNumber,
+        
             password: hashedPassword,
             role,
             profile: {

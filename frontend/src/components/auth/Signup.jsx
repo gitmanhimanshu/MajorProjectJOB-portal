@@ -9,7 +9,7 @@ import { setUser } from '@/redux/authSlice'
 import axios from 'axios'
 import { USER_API_END_POINT } from '@/utils/constant'
 import { toast } from 'sonner'
-import { Loader2, Mail, Lock, User2, Building2 } from 'lucide-react'
+import { Loader2, Mail, Lock, User2, Building2, Phone } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 
 const Signup = () => {
@@ -17,7 +17,8 @@ const Signup = () => {
         fullname: "",
         email: "",
         password: "",
-        role: ""
+        role: "",
+        phoneNumber: ""
     });
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
@@ -35,7 +36,7 @@ const Signup = () => {
         e.preventDefault();
         try {
             setLoading(true);
-            const res = await axios.post(`${USER_API_END_POINT}/signup`, input, {
+            const res = await axios.post(`${USER_API_END_POINT}/register`, input, {
                 headers: {
                     'Content-Type': 'application/json'
                 },
@@ -90,6 +91,21 @@ const Signup = () => {
                                         onChange={changeEventHandler}
                                         className="pl-10"
                                         placeholder="himanshu@example.com"
+                                        required
+                                    />
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-sm font-medium">Phone Number</Label>
+                                <div className="relative">
+                                    <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                                    <Input
+                                        type="tel"
+                                        name="phoneNumber"
+                                        value={input.phoneNumber}
+                                        onChange={changeEventHandler}
+                                        className="pl-10"
+                                        placeholder="+91 1234567890"
                                         required
                                     />
                                 </div>
